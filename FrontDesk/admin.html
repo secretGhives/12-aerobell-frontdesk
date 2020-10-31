@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>AEROBELL Flight Board Administration</title>
+
+  <link rel="stylesheet" href="assets/css/su.css">
+  <link rel="stylesheet" href="assets/css/font-awesome.css">
+  <link rel="stylesheet" href="assets/css/bootstrap.css">
+
+  <!-- Libraries -->
+  <script src="assets/libs/jquery.js"></script>
+  <script src="assets/libs/bootstrap.js"></script>
+  <script src="assets/libs/time.js"></script>
+  <script src="assets/libs/datepicker.js"></script>
+
+  <!-- LOADING SCRIPT STARTS -->
+  <script>
+  $(window).load(function(){
+
+    if(typeof(Storage)!=="undefined") {
+      // Yes! localStorage and sessionStorage support!
+      console.log("LocalStorage Enabled");
+      $('#rad' + localStorage.flipper).attr('checked',true);
+    } else {
+      // Sorry! No web storage support..
+      console.log("LocalStorage Disabled");
+    }
+
+    $("#loading").fadeOut(function(){
+      $(this).remove();
+      $('body').css('overflow', 'auto');
+    });
+  });
+  </script>
+  <style type = "text/css">
+    body{overflow: hidden;}
+    #loaderContainer {position: absolute; top:50%; left:50%;}
+    #loaderContent {width: 230px; text-align: center; height: 100px; margin: -50px auto 0 auto; margin-left: -115px; }
+    #loading {background-color: #fff; overflow:hidden; width:100%; height:100%; position: absolute; top: 0; left: 0; z-index: 9999;}
+  </style>
+  <!-- LOADING SCRIPT END -->
+</head>
+
+<body>
+
+  <div id="loading">
+  <script type = "text/javascript">
+    document.write("<div id='loaderContainer'><p id='loaderContent'>" +
+                   "<img id='loadinggraphic' src='assets/img/AFS_small.png' />" +
+                   "</p></div>");
+  </script>
+  </div>
+
+  <!-- ADMIN FLIGHT BOARD STARTS HERE -->
+  <div id="admin-flights">
+
+    <ul id="admin-options" class="unstyled">
+      <li><label class="radio"><input type="radio" name="pageOptions" id="radflights" value="flights" checked>Flights</label></li>
+      <li><label class="radio"><input type="radio" name="pageOptions" id="radweather" value="weather"> Weather</label></li>
+      <li><label class="radio"><input type="radio" name="pageOptions" id="radrotate" value="rotate"> Rotate</label></li>
+    </ul>
+
+    <table id="admin-flight-table" class="full b">
+      <thead>
+        <tr>
+          <th><i class="icon-cogs"></i></th>
+          <th><label class="checkbox"><input id="colStatus" type="checkbox" checked /> status</label></th>
+          <th><label class="checkbox"><input id="colAircraft" type="checkbox" checked /> aircraft</label></th>
+          <th><label class="checkbox"><input id="colDeparture" type="checkbox" checked /> departure</label></th>
+          <th><label class="checkbox"><input id="colArrival" type="checkbox" checked /> arrival</label></th>
+          <th><label class="checkbox"><input id="colPilot" type="checkbox" checked /> pilot</label></th>
+          <th><label class="checkbox"><input id="colCopilot" type="checkbox" checked /> copilot</label></th>
+          <th><label class="checkbox"><input id="colPax" type="checkbox" checked /> pax</label></th>
+          <th><label class="checkbox"><input id="colNotes" type="checkbox" checked /> notes</label></th>
+        </tr>
+      </thead>
+      <tbody id="flight-table-body">
+        <tr class="departed">
+        	<td><button class="remove-flight"><i class="icon-trash"></i></button></td>
+          <td class="first">
+          	<select class="admin-flight-status input-small">
+  	          <option selected>Departed</option>
+  	          <option>Delayed</option>
+  	          <option>Pending</option>
+  	          <option>On-Time</option>
+  	          <option>Arrived</option>
+  	          <option>Canceled</option>
+  	        </select>
+  	      </td>
+          <td><label class="aircraft">TI-QWE</label></td>
+          <td><label class="departure-time">06:00</label></td>
+          <td><label class="arrival-time">12:00</label></td>
+          <td><label class="pilot">ASWAFFORD</label></td>
+          <td><label class="copilot">AKUZENKOV</label></td>
+          <td><label class="pax">2</label></td>
+          <td><label class="remarks">Expected wait 3+ hrs</label></td>
+        </tr>
+      </tbody>
+    </table>
+  </div><!-- ADMIN FLIGHT BOARD ENDS HERE -->
+
+  <!-- ADMIN NEW FLIGHT FORM STARTS HERE -->
+  <div id="admin-new-flight">
+    <input type="hidden" id="flightId"/>
+    <section id="form" class="form-vertical">
+  	  <fieldset>
+  	    <div class="control-group">
+  	      <label class="control-label" for="nf-date">Date</label>
+  	      <div class="controls">
+  	        <input type="text" class="input-medium" id="nf-date" placeholder="Flight date" data-datepicker="datepicker">
+  	      </div>
+  	    </div>
+
+  	    <div class="control-group">
+  	      <label class="control-label" for="nf-aircraft">Aircraft</label>
+  	      <div class="controls">
+            <input type="text" class="input-medium" id="nf-aircraft" placeholder="Which aircraft?" data-provide="typeahead" data-items="7" data-source="[&quot;TI-QWE&quot;,&quot;TI-WER&quot;,&quot;TI-ERT&quot;,&quot;TI-RTY&quot;,&quot;TI-TYU&quot;,&quot;TI-BAW&quot;]">
+  	      </div>
+  	    </div>
+
+  	    <div class="control-group">
+  	      <label class="control-label" for="nf-date">Departure/Arrival</label>
+  	      <div class="controls">
+  	        <input type="text" class="input-small" id="nf-departure" placeholder="Depart">
+  	        <input type="text" class="input-small" id="nf-arrival" placeholder="Arrive">
+  	      </div>
+  	    </div>
+
+  	    <div class="control-group">
+  	      <label class="control-label" for="nf-pilot">Pilot</label>
+  	      <div class="controls">
+  	        <input type="text" class="input-xlarge" id="nf-pilot" placeholder="Who is flying?" data-provide="typeahead" data-items="4" data-source="[&quot;ASWAFFORD&quot;,&quot;AKUZENKOV&quot;,&quot;JLEIVA&quot;,&quot;JPISARO&quot;]" maxlength="10">
+  	      </div>
+  	    </div>
+
+  	    <div class="control-group">
+  	      <label class="control-label" for="nf-pilot">Co-Pilot</label>
+  	      <div class="controls">
+  	        <input type="text" class="input-xlarge" id="nf-copilot" placeholder="Who is co-pilot?" data-provide="typeahead" data-items="4" data-source="[&quot;ASWAFFORD&quot;,&quot;AKUZENKOV&quot;,&quot;JLEIVA&quot;,&quot;JPISARO&quot;]" maxlength="10">
+  	      </div>
+  	    </div>
+
+  	    <div class="control-group">
+  	      <label class="control-label" for="nf-pax">Passengers</label>
+  	      <div class="controls">
+  	        <input type="number" class="input-medium" id="nf-pax" placeholder="How many?">
+  	      </div>
+  	    </div>
+
+  	    <div class="control-group">
+  	      <label class="control-label" for="nf-route">Route</label>
+  	      <div class="controls">
+  	        <input type="text" class="input-xlarge" id="nf-route" placeholder="MRPV-MROC-MRLB-MRLM-MRPV">
+  	      </div>
+  	    </div>
+
+  	    <div class="control-group">
+  	      <label class="control-label" for="textarea">Notes</label>
+  	      <div class="controls">
+  	        <textarea class="input-xlarge" id="nf-notes" rows="3" placeholder="Keep it short"></textarea>
+  	      </div>
+  	    </div>
+
+        <div class="control-group">
+          <label class="control-label" for="nf-status">Status</label>
+          <div class="controls">
+            <input type="text" class="input-medium" id="nf-status" placeholder="Status of the flight" data-provide="typeahead" data-items="4" data-source="[&quot;pending&quot;,&quot;departed&quot;,&quot;on-time&quot;,&quot;arrived&quot;,&quot;delayed&quot;,&quot;canceled&quot;]" maxlength="10">
+          </div>
+        </div>
+
+  	    <div class="form-actions">
+          <button id="btn-insert-flight" class="btn btn-success" onclick="insertRecord()">Insert</button>
+          <button id="btn-update-flight" class="btn btn-primary hide" onclick="updateRecord()">Update</button>
+  	      <button class="btn" onclick="resetForm()">Reset</button>
+          <button onclick="dropTable()" class="hide">Drop Table</button>
+  	    </div>
+  	  </fieldset>
+    </section>
+
+  </div><!-- ADMIN NEW FLIGHT FORM ENDS HERE -->
+
+
+<!-- Application
+<script src="assets/libs/chosen-min.js"></script>
+<script src="app/fazzle.js"></script>
+<script src="app/modules/runway.js"></script>
+<script src="assets/libs/underscore.js"></script>
+<script src="assets/libs/backbone.js"></script>
+-->
+
+<script>
+!function ($) {
+  $(function(){
+
+		// Use default settings
+    $("#nf-departure, #nf-arrival").timePicker({
+		  show24Hours: true,
+		  step: 30
+		});
+
+    $("input[name='pageOptions']").change(function(){
+      console.log("set to:" + $(this).val());
+      localStorage.flipper = $(this).val();
+    });
+
+
+  });
+}(window.jQuery)
+</script>
+
+
+<script>
+var flightResuts = document.getElementById('flight-table-body');
+var id = document.getElementById('flightId');
+var flightStatus = document.getElementById('nf-status');
+var flightAircraft = document.getElementById('nf-aircraft');
+var flightDate = document.getElementById('nf-date');
+var flightDeparture = document.getElementById('nf-departure');
+var flightArrival = document.getElementById('nf-arrival');
+var flightPilot = document.getElementById('nf-pilot');
+var flightCopilot = document.getElementById('nf-copilot');
+var flightPassangers = document.getElementById('nf-pax');
+var flightRoute = document.getElementById('nf-route');
+var flightNotes = document.getElementById('nf-notes');
+
+var createStatement = "CREATE TABLE IF NOT EXISTS Flights (id INTEGER PRIMARY KEY AUTOINCREMENT, flightStatus TEXT, flightAircraft TEXT, flightDate TEXT, flightDeparture TEXT, flightArrival TEXT, flightPilot TEXT, flightCopilot TEXT, flightPassangers TEXT, flightRoute TEXT, flightNotes TEXT)";
+var selectAllStatement = "SELECT * FROM Flights ORDER BY flightDeparture";
+var insertStatement = "INSERT INTO Flights (flightStatus, flightAircraft, flightDate, flightDeparture, flightArrival, flightPilot, flightCopilot, flightPassangers, flightRoute, flightNotes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+var updateStatement = "UPDATE Flights SET flightStatus = ?, flightAircraft = ?, flightDate = ?, flightDeparture = ?, flightArrival = ?, flightPilot = ?, flightCopilot = ?, flightPassangers = ?, flightRoute = ?, flightNotes = ? WHERE id = ?";
+var deleteStatement = "DELETE FROM Flights WHERE id=?";
+var dropStatement = "DROP TABLE Flights";
+
+var db = openDatabase("FlightBoard", "1.0", "AeroBell Flight Board", 200000);
+var dataset;
+createTable();
+
+function onError(tx, error) {
+  alert(error.message);
+}
+
+function showRecords() {
+  flightResuts.innerHTML = '';
+  db.transaction(function(tx) {
+    tx.executeSql(selectAllStatement, [], function(tx, result) {
+      dataset = result.rows;
+      for (var i = 0, item = null; i < dataset.length; i++) {
+        item = dataset.item(i);
+        flightResuts.innerHTML +=
+            '<tr class="' + item['flightStatus'] + '">' +
+            '<td><button class="edit-flight" onclick="loadRecord('+i+')"><i class="icon-edit"></i></button><button class="remove-flight" onclick="deleteRecord('+item['id']+')"><i class="icon-trash"></i></button></td>' +
+            '<td class="first editable" contentEditable="true">' + item['flightStatus'] + '</td>' +
+            '<td class=""><label class="aircraft editable" contentEditable="true">' + item['flightAircraft'] + '</label></td>' +
+            '<td class=""><label class="departure editable" contentEditable="true">' + item['flightDeparture'] + '</label></td>' +
+            '<td class=""><label class="arrival editable" contentEditable="true">' + item['flightArrival'] + '</label></td>' +
+            '<td class=""><label class="pilot editable" contentEditable="true">' + item['flightPilot'] + '</label></td>' +
+            '<td class=""><label class="copilot editable" contentEditable="true">' + item['flightCopilot'] + '</label></td>' +
+            '<td class=""><label class="pax editable" contentEditable="true">' + item['flightPassangers'] + '</label></td>' +
+            '<td class=""><label class="notes editable" contentEditable="true">' + item['flightNotes'] + '</label></td>' +
+            '</tr>';
+      }
+    });
+  });
+}
+
+function createTable() {
+  db.transaction(function(tx) {
+    tx.executeSql(createStatement, [], showRecords, onError);
+  });
+}
+
+function insertRecord() {
+  db.transaction(function(tx) {
+    tx.executeSql(insertStatement, [flightStatus.value, flightAircraft.value, flightDate.value, flightDeparture.value, flightArrival.value, flightPilot.value, flightCopilot.value, flightPassangers.value, flightRoute.value, flightNotes.value], loadAndReset, onError);
+  });
+}
+
+function loadRecord(i) {
+  var item = dataset.item(i);
+  flightStatus.value = item['flightStatus'];
+  flightAircraft.value = item['flightAircraft'];
+  flightDate.value = item['flightDate'];
+  flightDeparture.value = item['flightDeparture'];
+  flightArrival.value = item['flightArrival'];
+  flightPilot.value = item['flightPilot'];
+  flightCopilot.value = item['flightCopilot'];
+  flightPassangers.value = item['flightPassangers'];
+  flightRoute.value = item['flightRoute'];
+  flightNotes.value = item['flightNotes'];
+  id.value = item['id'];
+  $('#btn-insert-flight').hide();
+  $('#btn-update-flight').show();
+}
+
+
+
+
+function updateRecord() {
+  db.transaction(function(tx) {
+    tx.executeSql(updateStatement, [flightStatus.value, flightAircraft.value, flightDate.value, flightDeparture.value, flightArrival.value, flightPilot.value, flightCopilot.value, flightPassangers.value, flightRoute.value, flightNotes.value, id.value], loadAndReset, onError);
+  });
+  $('#btn-insert-flight').show();
+  $('#btn-update-flight').hide();
+}
+
+function deleteRecord(id) {
+  db.transaction(function(tx) {
+    tx.executeSql(deleteStatement, [id], showRecords, onError);
+  });
+  resetForm();
+}
+
+function dropTable() {
+  db.transaction(function(tx) {
+    tx.executeSql(dropStatement, [], showRecords, onError);
+  });
+  resetForm();
+}
+
+function loadAndReset(){
+  resetForm();
+  showRecords();
+}
+
+function resetForm(){
+  flightStatus.value = '';
+  flightAircraft.value = '';
+  flightDate.value = '';
+  flightDeparture.value = '';
+  flightArrival.value = '';
+  flightPilot.value = '';
+  flightCopilot.value = '';
+  flightPassangers.value = '';
+  flightRoute.value = '';
+  flightNotes.value = '';
+  id.value = '';
+  $('#btn-insert-flight').show();
+  $('#btn-update-flight').hide();
+}
+</script>
+
+</body>
+</html>
+<!--// &#9734;  ☆ KUZYA.COM
+                             -~-%%%-,,
+                           ,%       ^2%
+                          -ZZ2       22
+                          -22%-,    .22
+ ~,2~ ,i,       qWE2      %qggp2222gggp2     .2Zg,          .- ,-
+ ,,222NEEBBggggg222%      -WWWWWqQWWWFBF     `?ZW\,,,,ggggggp2%==-"
+ ,,,ggBBBBBBBBBBBBgggg,   -222%2WB2^27Z^ ,ggggggBNBWBBBWBBBWB2s==~-
+   ,ggBBBBBWWBBBWBWWBBBBgg,  %%JE@P  qggBBBBBBWWBWBWBWWWWBWWBE2"""`
+   ``qBWWBBBBBWWBWNBWBBWBWBBm%%%%% .dWBWBBBWWWWBNWBBBBWWBWWWWE"""
+        `"WWWWBWHWBBBBEBWW"^ ,gggg,`/"WWWBWBWWBBWWNWBWBWWWWWF"^
+            ""WBgdWW"""   ggWWWWWBWBgg, `"""""""W3EBWF"\
+               ""F ~g  iqdWBBWBBNBWBWWWBr,   F -JWWW
+                   -7   "" ^^7@WWWWW/"7"-"\  ^
+                              3H@ZES
+                               3@EP`
+                                22,
+                                LL/
+
+    ┌────────────────────────────────────────────────────────┐
+    │ Date of Creation ..................Feb...... Year 2012 │
+    └────────────────────────────────────────────────────────┘
+//-->

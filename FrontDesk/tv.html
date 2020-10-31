@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>AEROBELL Flight Board</title>
+
+  <link rel="stylesheet" href="assets/css/su.css">
+  <link rel="stylesheet" href="assets/css/font-awesome.css">
+
+  <!-- Libraries -->
+  <script src="assets/libs/jquery.js"></script>
+  <script src="assets/libs/bootstrap.js"></script>
+  <script src="assets/libs/clock.js"></script>
+  <script src="assets/libs/sqlite.js"></script>
+
+  <!-- LOADING SCRIPT STARTS -->
+  <script>
+  $(window).load(function(){
+
+    if(typeof(Storage)!=="undefined") {
+      // Yes! localStorage and sessionStorage support!
+      console.log("LocalStorage Enabled");
+
+      var flipInterval, flightInterval, weatherInterval;
+      var pageSetting = localStorage.flipper;
+      switch (pageSetting) {
+          case 'flights':
+            console.log("loading default page setting for Flights");
+            $('#weather').removeClass('active in');
+            $('#flights').addClass('active in');
+
+            loadFlights();
+            flightInterval = setInterval( loadFlights, 3000 );
+
+            break;
+          case 'weather':
+            console.log("loading default page setting for Weather");
+            $('#flights').removeClass('active in');
+            $('#weather').addClass('active in');
+
+            loadWeather();
+            weatherInterval = setInterval( loadWeather, 600000 );
+
+            break;
+          case 'rotate':
+            console.log("loading default page setting for Rotation");
+            flipInterval = setInterval( rotateTabs, 30000 );
+            console.log('started 30 second flip');
+
+            loadWeather();
+            loadFlights();
+            flightInterval = setInterval( loadFlights, 3000 );
+
+            break;
+          default:
+            console.log("loading default page setting");
+      }
+
+    } else {
+      // Sorry! No web storage support..
+      console.log("LocalStorage Disabled");
+    }
+
+    $("#loading").fadeOut(function(){
+      $(this).remove();
+      $('body').css('overflow', 'auto');
+    });
+  });
+
+
+  var db = SQLite({ shortName: 'FlightBoard' });
+
+  function loadFlights() {
+
+    db.select('Flights', '*', null, { order: 'flightDeparture ASC' }, function (results) {
+      document.getElementById('flight-table-body').innerHTML = " ";
+      var x; for(x=0; x<results.rows.length; x++) {
+        var item = results.rows.item(x);
+        document.getElementById('flight-table-body').innerHTML +=
+            '<tr class="' + item['flightStatus'] + '">' +
+            '<td class="first"><label class="status">' + item['flightStatus'] + '</label></td>' +
+            '<td class=""><label class="aircraft">' + item['flightAircraft'] + '</label></td>' +
+            '<td class=""><label class="aircraft">' + item['flightDeparture'] + '</label></td>' +
+            '<td class=""><label class="aircraft">' + item['flightArrival'] + '</label></td>' +
+            '<td class=""><label class="aircraft">' + item['flightPilot'] + '</label></td>' +
+            '<td class=""><label class="aircraft">' + item['flightCopilot'] + '</label></td>' +
+            '<td class=""><label class="aircraft">' + item['flightPassangers'] + '</label></td>' +
+            '<td class=""><label class="route">' + item['flightRoute'] + '</label></td>' +
+            '<td class=""><label class="aircraft">' + item['flightNotes'] + '</label></td>' +
+            '</tr>';
+      }
+    });
+
+    //console.log("Loaded flights");
+  }
+
+  function loadWeather() {
+    //Get METAR
+    $("#MRPV .metar").load("assets/php/metar.php?icao=MRPV");
+    $("#MRPV .taf").load("assets/php/taf.php?icao=MRPV");
+    $("#MROC .metar").load("assets/php/metar.php?icao=MROC");
+    $("#MROC .taf").load("assets/php/taf.php?icao=MROC");
+    $("#MRLB .metar").load("assets/php/metar.php?icao=MRLB");
+    $("#MRLB .taf").load("assets/php/taf.php?icao=MRLB");
+    $("#MRLM .metar").load("assets/php/metar.php?icao=MRLM");
+    $("#MRLM .taf").load("assets/php/taf.php?icao=MRLM");
+
+    //console.log("Loaded weather");
+  }
+
+  //Function to switch tabs
+  function rotateTabs() {
+    //console.log('rotated');
+    if ( $('#flights').hasClass("active") ) {
+      $('#weather').addClass('active in');
+      $('#flights').removeClass('active in');
+    } else {
+      $('#flights').addClass('active in');
+      $('#weather').removeClass('active in');
+    }
+  }
+  function stopFlip() {
+    clearInterval(flipInterval);
+    console.log('stopped flipping');
+  }
+
+  </script>
+  <style type = "text/css">
+    body{overflow: hidden;}
+    #loaderContainer {position: absolute; top:50%; left:50%;}
+    #loaderContent {width: 230px; text-align: center; height: 100px; margin: -50px auto 0 auto; margin-left: -115px; }
+    #loading {background-color: #fff; overflow:hidden; width:100%; height:100%; position: absolute; top: 0; left: 0; z-index: 9999;}
+  </style>
+  <!-- LOADING SCRIPT END -->
+</head>
+
+<body>
+
+  <div id="loading">
+  <script type = "text/javascript">
+    document.write("<div id='loaderContainer'><p id='loaderContent'>" +
+                   "<img id='loadinggraphic' src='assets/img/AFS_small.png' />" +
+                   "</p></div>");
+  </script>
+  </div>
+
+  <!-- FLIGHT BOARD TAB STARTS HERE -->
+  <div class="fade active in" id="flights">
+    <table id="flight-table" class="full b">
+      <thead>
+        <tr>
+          <th class="th-status">status</th>
+          <th class="th-tail">tail</th>
+          <th class="th-depart">depart</th>
+          <th class="th-arrive">arrive</th>
+          <th class="th-pilot">pilot</th>
+          <th class="th-copilot">copilot</th>
+          <th class="th-pax">pax</th>
+          <th class="th-route">route</th>
+          <th class="th-notes">notes</th>
+        </tr>
+      </thead>
+
+      <tbody id="flight-table-body">
+        <!--
+        <tr class="departed">
+          <td class="first"><label class="status">departed</label></td>
+          <td><label class="aircraft">TI-QWE</label></td>
+          <td><label class="departure-time">06:00</label></td>
+          <td><label class="arrival-time">12:00</label></td>
+          <td><label class="pilot">ASWAFFORD</label></td>
+          <td><label class="copilot">AKUZENKOV</label></td>
+          <td><label class="pax">2</label></td>
+          <td><label class="route">MRPV-MROC</label></td>
+          <td><label class="remarks">Expected wait 3+ hrs</label></td>
+        </tr>
+        -->
+      </tbody>
+
+    </table>
+  </div><!-- FLIGHT BOARD TAB ENDS HERE -->
+
+
+  <!-- WEATHER TAB STARTS HERE -->
+  <div class="fade" id="weather">
+    <div id="weather-images">
+      <img src="http://images.intellicast.com/WxImages/CurrentWind/camer.jpg" class="fit" />
+      <img src="http://images.intellicast.com/WxImages/Winds/camer_day1.jpg" class="fit" />
+      <img src="http://images.intellicast.com/WxImages/CurrentConditions/camer.jpg" class="fit" />
+      <img src="http://www.imn.ac.cr/especial/SATVIS.GIF" class="fit" />
+      <img src="http://www.imn.ac.cr/especial/SATELITE.GIF" class="fit" />
+      <img src="http://images.intellicast.com/WxImages/Satellite/camer.jpg" class="fit" />
+      <img src="http://images.intellicast.com/WxImages/SatelliteLoop/hicbsat_None_anim.gif" class="fit" />
+      <img src="http://www.imn.ac.cr/especial/QNHPAVAS.png" class="fit" />
+      <img src="http://www.imn.ac.cr/especial/PavasRed.png" class="fit" />
+    </div>
+
+    <div id="weather-text">
+      <div id="weather-pad">
+        <div id="clock"></div>
+        <div id="MRPV" class="text-data">
+          <span class="metar">n/a</span>
+          <span class="taf">n/a</span>
+        </div>
+        <div id="MROC" class="text-data">
+          <span class="metar">n/a</span>
+          <span class="taf">n/a</span>
+        </div>
+        <div id="MRLB" class="text-data">
+          <span class="metar">n/a</span>
+          <span class="taf">n/a</span>
+        </div>
+        <div id="MRLM" class="text-data">
+          <span class="metar">n/a</span>
+          <span class="taf">n/a</span>
+        </div>
+      </div>
+    </div>
+  </div><!-- WEATHER TAB ENDS HERE -->
+
+</body>
+</html>
+<!--// &#9734;  ☆ KUZYA.COM
+                             -~-%%%-,,
+                           ,%       ^2%
+                          -ZZ2       22
+                          -22%-,    .22
+ ~,2~ ,i,       qWE2      %qggp2222gggp2     .2Zg,          .- ,-
+ ,,222NEEBBggggg222%      -WWWWWqQWWWFBF     `?ZW\,,,,ggggggp2%==-"
+ ,,,ggBBBBBBBBBBBBgggg,   -222%2WB2^27Z^ ,ggggggBNBWBBBWBBBWB2s==~-
+   ,ggBBBBBWWBBBWBWWBBBBgg,  %%JE@P  qggBBBBBBWWBWBWBWWWWBWWBE2"""`
+   ``qBWWBBBBBWWBWNBWBBWBWBBm%%%%% .dWBWBBBWWWWBNWBBBBWWBWWWWE"""
+        `"WWWWBWHWBBBBEBWW"^ ,gggg,`/"WWWBWBWWBBWWNWBWBWWWWWF"^
+            ""WBgdWW"""   ggWWWWWBWBgg, `"""""""W3EBWF"\
+               ""F ~g  iqdWBBWBBNBWBWWWBr,   F -JWWW
+                   -7   "" ^^7@WWWWW/"7"-"\  ^
+                              3H@ZES
+                               3@EP`
+                                22,
+                                LL/
+
+    ┌────────────────────────────────────────────────────────┐
+    │ Date of Creation ..................Feb...... Year 2012 │
+    └────────────────────────────────────────────────────────┘
+//-->
